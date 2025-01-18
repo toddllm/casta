@@ -1,52 +1,87 @@
-// frontend/src/components/board/Board.jsx
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectPiece, movePiece, initializeBoard } from '../../store/gameSlice';
+import React, { useState } from 'react';
+import Square from './Square';
+
+const createInitialBoard = () => {
+  const board = Array(8).fill(null).map(() => Array(8).fill(null));
+  
+  // Place Rooks (R)
+  board[0][0] = { type: 'R', color: 'black' };
+  board[0][7] = { type: 'R', color: 'black' };
+  board[7][0] = { type: 'R', color: 'white' };
+  board[7][7] = { type: 'R', color: 'white' };
+  
+  // Place Dragons (D)
+  board[0][1] = { type: 'D', color: 'black' };
+  board[0][6] = { type: 'D', color: 'black' };
+  board[7][1] = { type: 'D', color: 'white' };
+  board[7][6] = { type: 'D', color: 'white' };
+  
+  // Place Casta pieces (C)
+  board[0][3] = { type: 'C', color: 'black' };
+  board[7][3] = { type: 'C', color: 'white' };
+
+  return board;
+};
 
 const Board = () => {
-  const dispatch = useDispatch();
-  const board = useSelector(state => state.game.board);
-  const selectedPiece = useSelector(state => state.game.selectedPiece);
-
-  useEffect(() => {
-    // Initialize the board when component mounts
-    dispatch(initializeBoard());
-  }, [dispatch]);
-
-  const handleSquareClick = (x, y) => {
-    if (selectedPiece) {
-      dispatch(movePiece({ from: selectedPiece, to: { x, y } }));
-    } else if (board[y][x]) {
-      dispatch(selectPiece({ x, y }));
+  const [board, setBoard] = useState(createInitialBoard());
+  const [selectedSquare, setSelectedSquare] = useState(null);
+  
+  const handleSquareClick = (row, col) => {
+    if (selectedSquare) {
+      // If a square was already selected, try to move the piece
+      const [selectedRow, selectedCol] = selectedSquare;
+      
+      if (selectedRow === row && selectedCol === col) {
+        // Clicking the same square deselects it
+        setSelectedSquare(null);
+      } else {
+        // Move piece (for now, just swap positions)
+        const newBoard = [...board.map(row => [...row])];
+        newBoard[row][col] = board[selectedRow][selectedCol];
+        newBoard[selectedRow][selectedCol] = null;
+        setBoard(newBoard);
+        setSelectedSquare(null);
+      }
+    } else if (board[row][col]) {
+      // If clicking a piece, select it
+      setSelectedSquare([row, col]);
     }
   };
 
+  const squares = [];
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const isLight = (row + col) % 2 === 0;
+      const piece = board[row][col];
+      const isSelected = selectedSquare && 
+                        selectedSquare[0] === row && 
+                        selectedSquare[1] === col;
+      
+      squares.push(
+        <Square
+          key={`${row}-${col}`}
+          isLight={isLight}
+          piece={piece}
+          isSelected={isSelected}
+          onClick={() => handleSquareClick(row, col)}
+        />
+      );
+    }
+  }
+
   return (
-    <div className="grid grid-cols-8 gap-0 w-96 h-96 border-2 border-gray-800">
-      {board.map((row, y) => 
-        row.map((piece, x) => (
-          <div
-            key={`${x}-${y}`}
-            onClick={() => handleSquareClick(x, y)}
-            className={`
-              w-full h-full
-              ${(x + y) % 2 === 0 ? 'bg-gray-200' : 'bg-gray-600'}
-              ${selectedPiece?.x === x && selectedPiece?.y === y ? 'ring-2 ring-blue-500' : ''}
-              flex items-center justify-center
-            `}
-          >
-            {piece && (
-              <div className={`
-                w-8 h-8 rounded-full 
-                ${piece.color === 'white' ? 'bg-white' : 'bg-black'}
-                border-2 border-gray-800
-              `}>
-                {piece.type}
-              </div>
-            )}
-          </div>
-        ))
-      )}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(8, 60px)',
+      gap: '0px',
+      border: '2px solid #666',
+      padding: '4px',
+      backgroundColor: '#666',
+      maxWidth: 'fit-content',
+      margin: '20px auto'
+    }}>
+      {squares}
     </div>
   );
 };

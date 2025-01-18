@@ -11,9 +11,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5173'
-      : 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });
@@ -45,7 +43,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = 12001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
