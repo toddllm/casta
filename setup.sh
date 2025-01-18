@@ -10,7 +10,7 @@ fi
 
 # Default values
 ENV=${ENV:-"development"}
-NODE_VERSION="20.x"
+NODE_VERSION="20.10.0"
 
 # Colors for output
 RED='\033[0;31m'
@@ -44,6 +44,70 @@ create_directory_structure() {
     mkdir -p frontend/src/{components,contexts,hooks,services,styles,utils}
     mkdir -p frontend/src/components/{board,pieces,ui}
     mkdir -p docker/{development,production}
+}
+
+# Generate package.json files
+generate_package_files() {
+    log "Generating package.json files..."
+    
+    # Frontend package.json
+    cat > frontend/package.json << EOF
+{
+  "name": "casta-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vitest": "^1.0.4"
+  }
+}
+EOF
+
+    # Backend package.json
+    cat > backend/package.json << EOF
+{
+  "name": "casta-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2"
+  }
+}
+EOF
 }
 
 # Generate configuration files
@@ -191,6 +255,7 @@ main() {
     log "Starting setup for Casta game..."
     
     create_directory_structure
+    generate_package_files
     generate_config_files
     init_git
     
