@@ -1,24 +1,45 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
-const Square = ({ x, y, piece, onClick }) => {
-  const isBlack = (x + y) % 2 === 1;
-  const selectedPiece = useSelector(state => state.game.selectedPiece);
-  const isSelected = selectedPiece?.x === x && selectedPiece?.y === y;
+const Square = ({ isLight, piece, isSelected, onClick }) => {
+  const backgroundColor = isLight ? '#f0d9b5' : '#b58863';
+  
+  // Piece display styles
+  const getPieceStyle = (piece) => {
+    return {
+      width: '45px',
+      height: '45px',
+      borderRadius: '50%',
+      backgroundColor: piece.color,
+      border: '2px solid #333',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: piece.color === 'white' ? '#333' : '#fff',
+      fontSize: '24px',
+      fontWeight: 'bold',
+      userSelect: 'none'
+    };
+  };
 
   return (
-    <div
+    <div 
       onClick={onClick}
-      className={`
-        w-12 h-12 flex items-center justify-center
-        ${isBlack ? 'bg-gray-600' : 'bg-gray-200'}
-        ${isSelected ? 'ring-2 ring-blue-500' : ''}
-        cursor-pointer
-      `}
+      style={{
+        backgroundColor,
+        width: '60px',
+        height: '60px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        border: isSelected ? '2px solid #3498db' : '1px solid #666',
+        boxSizing: 'border-box',
+        position: 'relative'
+      }}
     >
       {piece && (
-        <div className="w-8 h-8 rounded-full bg-red-500">
-          {/* Temporary piece representation */}
+        <div style={getPieceStyle(piece)}>
+          {piece.type}
         </div>
       )}
     </div>
